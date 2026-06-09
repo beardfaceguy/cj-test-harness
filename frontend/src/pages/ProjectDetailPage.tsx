@@ -54,20 +54,23 @@ function TaskCard({
 
 export default function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>();
+  const pid = projectId ?? "";
 
-  if (!projectId) return <div>Invalid project URL.</div>;
-
-  const { data: project, isLoading: projectLoading } = useProject(projectId);
-  const { data: tasks, isLoading: tasksLoading } = useTasks(projectId);
-  const createTask = useCreateTask(projectId);
+  const { data: project, isLoading: projectLoading } = useProject(pid);
+  const { data: tasks, isLoading: tasksLoading } = useTasks(pid);
+  const createTask = useCreateTask(pid);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<Priority>("MEDIUM");
   const [showForm, setShowForm] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+
+  if (!projectId) return <div>Invalid project URL.</div>;
 
   const handleCreate = async (e: FormEvent) => {
     e.preventDefault();
+    setCreateError(null);
     try {
       await createTask.mutateAsync({
         title,
@@ -79,7 +82,7 @@ export default function ProjectDetailPage() {
       setPriority("MEDIUM");
       setShowForm(false);
     } catch {
-      // createTask.error will hold the error for display
+      setCreateError("Failed to create task. Please try again.");
     }
   };
 
@@ -122,6 +125,7 @@ export default function ProjectDetailPage() {
           <button type="submit" disabled={createTask.isPending}>
             Create Task
           </button>
+          {createError && <p style={{ color: "red" }}>{createError}</p>}
         </form>
       )}
 
@@ -132,7 +136,7 @@ export default function ProjectDetailPage() {
           {tasks?.map((task) => (
             <TaskCard key={task.id} task={task} projectId={projectId} />
           ))}
-          {tasks?.length === 0 && <p>No tasks yet.</p>}
+          {tasks?.length === 0 && <li>No tasks yet.</li>}
         </ul>
       )}
     </div>

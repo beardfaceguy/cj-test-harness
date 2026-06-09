@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 
 class TaskStatus(str, Enum):
@@ -21,8 +21,8 @@ class Priority(str, Enum):
 
 class UserCreate(BaseModel):
     email: EmailStr
-    name: str
-    password: str
+    name: str = Field(min_length=1, max_length=100)
+    password: str = Field(min_length=8, max_length=128)
 
 
 class UserResponse(BaseModel):
@@ -40,8 +40,8 @@ class Token(BaseModel):
 
 
 class ProjectCreate(BaseModel):
-    name: str
-    description: Optional[str] = None
+    name: str = Field(min_length=1, max_length=200)
+    description: Optional[str] = Field(None, max_length=1000)
 
 
 class ProjectUpdate(BaseModel):
@@ -61,8 +61,8 @@ class ProjectResponse(BaseModel):
 
 
 class TaskCreate(BaseModel):
-    title: str
-    description: Optional[str] = None
+    title: str = Field(min_length=1, max_length=500)
+    description: Optional[str] = Field(None, max_length=5000)
     status: TaskStatus = TaskStatus.TODO
     priority: Priority = Priority.MEDIUM
     dueDate: Optional[datetime] = None

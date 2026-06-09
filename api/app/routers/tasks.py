@@ -48,7 +48,7 @@ async def create_task(
         if assignee is None:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Assignee {payload.assigneeId} not found",
+                detail="Assignee not found",
             )
 
     data = {

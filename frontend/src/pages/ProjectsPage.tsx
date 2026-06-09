@@ -70,7 +70,7 @@ export default function ProjectsPage() {
             </button>
           </li>
         ))}
-        {projects?.length === 0 && <p>No projects yet. Create one above.</p>}
+        {projects?.length === 0 && <li>No projects yet. Create one above.</li>}
       </ul>
     </div>
   );
