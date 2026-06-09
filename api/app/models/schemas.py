@@ -22,7 +22,8 @@ class Priority(str, Enum):
 class UserCreate(BaseModel):
     email: EmailStr
     name: str = Field(min_length=1, max_length=100)
-    password: str = Field(min_length=8, max_length=128)
+    # BUG-W3: no minimum password length — 1-character passwords accepted
+    password: str = Field(max_length=128)
 
 
 class UserResponse(BaseModel):
@@ -54,6 +55,8 @@ class ProjectCreate(BaseModel):
 
 
 class ProjectUpdate(BaseModel):
+    # BUG-B4: ownerId accepted in update — allows ownership takeover
+    ownerId: Optional[str] = None
     name: Optional[str] = Field(None, min_length=1, max_length=200)
     description: Optional[str] = Field(None, max_length=1000)
 
@@ -70,7 +73,8 @@ class ProjectResponse(BaseModel):
 
 
 class TaskCreate(BaseModel):
-    title: str = Field(min_length=1, max_length=500)
+    # BUG-W4: no max_length on title — accepts unlimited-length strings
+    title: str = Field(min_length=1)
     description: Optional[str] = Field(None, max_length=5000)
     status: TaskStatus = TaskStatus.TODO
     priority: Priority = Priority.MEDIUM
@@ -85,6 +89,8 @@ class TaskUpdate(BaseModel):
     priority: Optional[Priority] = None
     dueDate: Optional[datetime] = None
     assigneeId: Optional[str] = None
+    # BUG-B7: projectId accepted in update — allows cross-project task migration
+    projectId: Optional[str] = None
 
 
 class TaskResponse(BaseModel):

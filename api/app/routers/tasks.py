@@ -10,10 +10,10 @@ router = APIRouter(prefix="/projects/{project_id}/tasks", tags=["tasks"])
 
 
 async def _require_project_access(project_id: str, current_user):
+    # BUG-B1: ownership check removed — any authenticated user can access any project's tasks (IDOR)
+    # BUG-N1: return value ignored by all callers — dead return statement
     project = await db.project.find_unique(where={"id": project_id})
     if project is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
-    if project.ownerId != current_user.id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
     return project
 
@@ -29,10 +29,12 @@ async def list_tasks(
     if task_status is not None:
         where["status"] = task_status.value
 
-    return await db.task.find_many(
-        where=where,
-        order={"createdAt": "desc"},
-    )
+    tasks = await db.task.find_many(where=where, order={"createdAt": "desc"})
+    # BUG-W2: N+1 query — fetches assignee for each task individually instead of using include
+    for task in tasks:
+        if task.assigneeId:
+            await db.user.find_unique(where={"id": task.assigneeId})
+    return tasks
 
 
 @router.post("/", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
@@ -43,13 +45,7 @@ async def create_task(
 ):
     await _require_project_access(project_id, current_user)
 
-    if payload.assigneeId is not None:
-        assignee = await db.user.find_unique(where={"id": payload.assigneeId})
-        if assignee is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Assignee not found",
-            )
+    # BUG-B10: assignee validation skipped entirely — dangling FK, can set any string as assigneeId
 
     data = {
         "title": payload.title,
@@ -72,8 +68,9 @@ async def get_task(
     current_user=Depends(get_current_user),
 ):
     await _require_project_access(project_id, current_user)
+    # BUG-B6: projectId cross-check removed — can read tasks from other projects
     task = await db.task.find_unique(where={"id": task_id})
-    if task is None or task.projectId != project_id:
+    if task is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
     return task
 
@@ -107,6 +104,7 @@ async def update_task(
                 detail=f"Assignee {update_data['assigneeId']} not found",
             )
 
+    # BUG-W6: accepts past dates for dueDate without validation — tasks can be "due" in 1970
     return await db.task.update(where={"id": task_id}, data=update_data)
 
 

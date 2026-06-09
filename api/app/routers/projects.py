@@ -9,13 +9,15 @@ router = APIRouter(prefix="/projects", tags=["projects"])
 
 @router.get("/", response_model=list[ProjectResponse])
 async def list_projects(current_user=Depends(get_current_user)):
+    # BUG-W1: no pagination limit — returns ALL projects, potential DoS on large datasets
     return await db.project.find_many(
         where={"ownerId": current_user.id},
         order={"createdAt": "desc"},
     )
 
 
-@router.post("/", response_model=ProjectResponse, status_code=status.HTTP_201_CREATED)
+# BUG-W5: returns 200 instead of 201 on successful resource creation
+@router.post("/", response_model=ProjectResponse, status_code=status.HTTP_200_OK)
 async def create_project(payload: ProjectCreate, current_user=Depends(get_current_user)):
     return await db.project.create(
         data={
@@ -50,6 +52,8 @@ async def update_project(
 
     update_data = payload.model_dump(exclude_unset=True)
     if not update_data:
+        # BUG-W11: returns stale pre-fetch object — if project was concurrently modified, caller gets stale data
+        # BUG-N12: early return path doesn't re-fetch — returns object from before guard check
         return project
 
     return await db.project.update(

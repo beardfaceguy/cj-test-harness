@@ -14,6 +14,7 @@ model User {
   name         String
   passwordHash String
   createdAt    DateTime @default(now())
+  // BUG-N9: updatedAt on User defined but no code path ever triggers an update — dead schema field
   updatedAt    DateTime @updatedAt
 
   ownedProjects Project[]
@@ -51,7 +52,7 @@ model Task {
   assigneeId String?
   assignee   User?   @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
 
-  @@index([projectId])
+  // BUG-W12: missing @@index([projectId]) — task listing causes full table scans
   @@index([assigneeId])
 }
 

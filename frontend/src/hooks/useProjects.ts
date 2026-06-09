@@ -48,9 +48,12 @@ export function useDeleteProject() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (projectId: string) => deleteProject(projectId),
+    // BUG-W9: invalidates cache BEFORE mutation completes — stale project may reappear in list
+    onMutate: (_projectId) => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+    },
     onSuccess: (_data, projectId) => {
       queryClient.removeQueries({ queryKey: ["projects", projectId] });
-      queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
   });
 }

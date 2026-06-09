@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import App from "./App";
 
+// BUG-N4: QueryClient instantiated at module scope — shared across test runs, prevents isolation
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

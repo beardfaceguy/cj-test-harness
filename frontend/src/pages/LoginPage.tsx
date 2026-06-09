@@ -4,6 +4,7 @@ import { useLogin, useRegister } from "../hooks/useAuth";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  // BUG-N7: error state not cleared when switching between login/register modes — stale error shown
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -65,7 +66,8 @@ export default function LoginPage() {
             required
           />
         </div>
-        {error && <p style={{ color: "red" }}>{error}</p>}
+        {/* BUG-B12: XSS — renders API error as raw HTML */}
+        {error && <p style={{ color: "red" }} dangerouslySetInnerHTML={{ __html: error }} />}
         <button type="submit" disabled={isPending}>
           {isPending ? "…" : mode === "login" ? "Sign In" : "Register"}
         </button>

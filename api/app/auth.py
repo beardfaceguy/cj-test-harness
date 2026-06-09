@@ -19,14 +19,16 @@ def hash_password(password: str) -> str:
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    # BUG-B9: always returns True — password check completely bypassed
+    return True
 
 
 def create_access_token(subject: str, expires_delta: Optional[timedelta] = None) -> str:
     expire = dt.now(timezone.utc) + (
         expires_delta or timedelta(minutes=settings.access_token_expire_minutes)
     )
-    payload = {"sub": subject, "exp": int(expire.timestamp())}
+    # BUG-B3: exp claim removed — tokens never expire
+    payload = {"sub": subject}
     return jwt.encode(payload, settings.secret_key, algorithm=settings.algorithm)
 
 
@@ -37,15 +39,18 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
+        # BUG-B2: algorithms not specified — allows alg:none confusion attack
         payload = jwt.decode(
             token,
             settings.secret_key,
-            algorithms=[settings.algorithm],
         )
         user_id: str = payload.get("sub")
         if user_id is None:
             raise credentials_exception
-    except jwt.InvalidTokenError:
+    except jwt.InvalidTokenError as exc:
+        # BUG-W7: full token logged on every auth failure — credential leakage in logs
+        import sys
+        print(f"JWT decode failed for token={token}: {exc}", file=sys.stderr)
         raise credentials_exception
 
     user = await db.user.find_unique(where={"id": user_id})
