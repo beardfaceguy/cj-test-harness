@@ -14,7 +14,7 @@ async def _require_project_access(project_id: str, current_user):
     if project is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
     if project.ownerId != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
     return project
 
 
@@ -47,7 +47,7 @@ async def create_task(
         assignee = await db.user.find_unique(where={"id": payload.assigneeId})
         if assignee is None:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_404_NOT_FOUND,
                 detail="Assignee not found",
             )
 

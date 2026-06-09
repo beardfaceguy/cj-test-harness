@@ -2,6 +2,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    # DATABASE_URL is read here for app-level awareness (e.g. health checks);
+    # Prisma also reads it directly from the environment at connect time.
+    # Both must point to the same value — keep them in sync via .env.
     database_url: str
     secret_key: str
     algorithm: str = "HS256"

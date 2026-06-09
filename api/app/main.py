@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.database import lifespan
+from app.database import db, lifespan
 from app.routers import auth, projects, tasks, users
 
 app = FastAPI(title="Task Tracker API", version="1.0.0", lifespan=lifespan)
@@ -23,4 +23,8 @@ app.include_router(tasks.router)
 
 @app.get("/healthz")
 async def health():
-    return {"status": "ok"}
+    try:
+        await db.user.count()
+        return {"status": "ok", "db": "ok"}
+    except Exception:
+        return {"status": "ok", "db": "unavailable"}

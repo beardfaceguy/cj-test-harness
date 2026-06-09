@@ -28,6 +28,7 @@ export default function ProjectsPage() {
   };
 
   if (isLoading) return <div>Loading projects…</div>;
+  if (!projects && !isLoading) return <div>Failed to load projects. Please refresh.</div>;
 
   return (
     <div style={{ maxWidth: 800, margin: "40px auto", padding: 24 }}>

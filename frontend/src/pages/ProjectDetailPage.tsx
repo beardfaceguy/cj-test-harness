@@ -97,7 +97,12 @@ export default function ProjectDetailPage() {
   };
 
   if (projectLoading) return <div>Loading…</div>;
-  if (!project) return <div>Project not found.</div>;
+  if (!project && !projectLoading) {
+    const status = (createTask.error as { response?: { status?: number } } | null)?.response?.status;
+    if (status === 403) return <div>Access denied.</div>;
+    if (status === 500) return <div>Server error. Please try again later.</div>;
+    return <div>Project not found.</div>;
+  }
 
   return (
     <div style={{ maxWidth: 800, margin: "40px auto", padding: 24 }}>
