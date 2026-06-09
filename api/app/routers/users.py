@@ -13,12 +13,8 @@ async def get_me(current_user=Depends(get_current_user)):
 
 
 @router.get("/{user_id}", response_model=UserResponse)
-async def get_user(user_id: str, current_user=Depends(get_current_user)):
-    if user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Cannot access another user's profile",
-        )
+async def get_user(user_id: str, _current_user=Depends(get_current_user)):
+    """Return any user's public profile (name + id). Requires authentication."""
     user = await db.user.find_unique(where={"id": user_id})
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")

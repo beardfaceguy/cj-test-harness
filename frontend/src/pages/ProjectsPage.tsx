@@ -12,13 +12,19 @@ export default function ProjectsPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   const handleCreate = async (e: FormEvent) => {
     e.preventDefault();
-    await createProject.mutateAsync({ name, description: description || undefined });
-    setName("");
-    setDescription("");
-    setShowForm(false);
+    setCreateError(null);
+    try {
+      await createProject.mutateAsync({ name, description: description || undefined });
+      setName("");
+      setDescription("");
+      setShowForm(false);
+    } catch {
+      setCreateError("Failed to create project. Please try again.");
+    }
   };
 
   if (isLoading) return <div>Loading projects…</div>;
@@ -50,6 +56,7 @@ export default function ProjectsPage() {
           <button type="submit" disabled={createProject.isPending}>
             Create
           </button>
+          {createError && <p style={{ color: "red" }}>{createError}</p>}
         </form>
       )}
 

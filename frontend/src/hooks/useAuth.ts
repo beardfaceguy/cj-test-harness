@@ -6,6 +6,7 @@ export function useMe() {
   return useQuery({
     queryKey: ["me"],
     queryFn: getMe,
+    enabled: Boolean(localStorage.getItem("access_token")),
     retry: false,
     staleTime: 5 * 60 * 1000,
   });

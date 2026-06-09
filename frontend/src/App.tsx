@@ -5,9 +5,14 @@ import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDetailPage from "./pages/ProjectDetailPage";
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
-  const { data: user, isLoading } = useMe();
+  const { data: user, isLoading, error } = useMe();
   if (isLoading) return <div>Loading…</div>;
-  if (!user) return <Navigate to="/login" replace />;
+  // Only redirect on 401; other errors (network, server) show an error state
+  if (error && (error as { response?: { status?: number } }).response?.status === 401) {
+    return <Navigate to="/login" replace />;
+  }
+  if (!user && !error) return <Navigate to="/login" replace />;
+  if (error) return <div>Could not load user. Please refresh.</div>;
   return <>{children}</>;
 }
 

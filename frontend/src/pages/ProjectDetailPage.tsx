@@ -21,9 +21,13 @@ function TaskCard({
     <li style={{ border: "1px solid #ddd", padding: 12, margin: "8px 0", borderRadius: 4 }}>
       <strong>{task.title}</strong>
       {task.description && <p style={{ margin: "4px 0" }}>{task.description}</p>}
+      {updateTask.isError && (
+        <p style={{ color: "red", fontSize: 12 }}>Update failed. Please try again.</p>
+      )}
       <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
         <select
           value={task.status}
+          disabled={updateTask.isPending}
           onChange={(e) =>
             updateTask.mutate({ status: e.target.value as TaskStatus })
           }
@@ -36,6 +40,7 @@ function TaskCard({
         </select>
         <select
           value={task.priority}
+          disabled={updateTask.isPending}
           onChange={(e) =>
             updateTask.mutate({ priority: e.target.value as Priority })
           }
@@ -46,7 +51,12 @@ function TaskCard({
             </option>
           ))}
         </select>
-        <button onClick={() => deleteTask.mutate(task.id)}>Delete</button>
+        <button
+          onClick={() => deleteTask.mutate(task.id)}
+          disabled={deleteTask.isPending}
+        >
+          Delete
+        </button>
       </div>
     </li>
   );
