@@ -1,5 +1,7 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { useMe } from "./hooks/useAuth";
+import { setUnauthorizedHandler } from "./api/client";
 import LoginPage from "./pages/LoginPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDetailPage from "./pages/ProjectDetailPage";
@@ -17,6 +19,12 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setUnauthorizedHandler(() => navigate("/login", { replace: true }));
+  }, [navigate]);
+
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />

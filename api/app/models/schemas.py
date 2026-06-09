@@ -26,10 +26,19 @@ class UserCreate(BaseModel):
 
 
 class UserResponse(BaseModel):
+    """Full user profile — only returned to the authenticated user themselves."""
     id: str
     email: str
     name: str
     createdAt: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class PublicUserResponse(BaseModel):
+    """Public profile — returned when resolving other users (e.g. task assignees)."""
+    id: str
+    name: str
 
     model_config = {"from_attributes": True}
 

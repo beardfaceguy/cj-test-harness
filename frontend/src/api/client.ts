@@ -13,13 +13,23 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+// Exported so callers (e.g. App.tsx) can wire React Router navigation
+export let onUnauthorized: (() => void) | null = null;
+export function setUnauthorizedHandler(handler: () => void) {
+  onUnauthorized = handler;
+}
+
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     const isAuthEndpoint = error.config?.url?.startsWith("/auth/");
     if (error.response?.status === 401 && !isAuthEndpoint) {
       localStorage.removeItem("access_token");
-      window.location.href = "/login";
+      if (onUnauthorized) {
+        onUnauthorized();
+      } else {
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }

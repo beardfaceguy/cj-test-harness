@@ -7,5 +7,7 @@ db = Prisma()
 @asynccontextmanager
 async def lifespan(_app):
     await db.connect()
-    yield
-    await db.disconnect()
+    try:
+        yield
+    finally:
+        await db.disconnect()
