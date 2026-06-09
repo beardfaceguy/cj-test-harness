@@ -18,8 +18,9 @@ docker compose up -d
 
 # 2. Set up the API
 cd api
-cp .env.example .env
+cp .env.example .env          # fill in SECRET_KEY
 pip install -r requirements.txt
+prisma generate --schema=../schema.prisma
 prisma db push --schema=../schema.prisma
 uvicorn app.main:app --reload
 

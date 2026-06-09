@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
@@ -18,7 +18,7 @@ async def _require_project_access(project_id: str, current_user):
     return project
 
 
-@router.get("/", response_model=List[TaskResponse])
+@router.get("/", response_model=list[TaskResponse])
 async def list_tasks(
     project_id: str,
     task_status: Optional[TaskStatus] = Query(None, alias="status"),

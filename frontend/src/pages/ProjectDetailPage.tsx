@@ -54,9 +54,12 @@ function TaskCard({
 
 export default function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>();
-  const { data: project, isLoading: projectLoading } = useProject(projectId!);
-  const { data: tasks, isLoading: tasksLoading } = useTasks(projectId!);
-  const createTask = useCreateTask(projectId!);
+
+  if (!projectId) return <div>Invalid project URL.</div>;
+
+  const { data: project, isLoading: projectLoading } = useProject(projectId);
+  const { data: tasks, isLoading: tasksLoading } = useTasks(projectId);
+  const createTask = useCreateTask(projectId);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -65,15 +68,19 @@ export default function ProjectDetailPage() {
 
   const handleCreate = async (e: FormEvent) => {
     e.preventDefault();
-    await createTask.mutateAsync({
-      title,
-      description: description || undefined,
-      priority,
-    });
-    setTitle("");
-    setDescription("");
-    setPriority("MEDIUM");
-    setShowForm(false);
+    try {
+      await createTask.mutateAsync({
+        title,
+        description: description || undefined,
+        priority,
+      });
+      setTitle("");
+      setDescription("");
+      setPriority("MEDIUM");
+      setShowForm(false);
+    } catch {
+      // createTask.error will hold the error for display
+    }
   };
 
   if (projectLoading) return <div>Loading…</div>;
@@ -123,7 +130,7 @@ export default function ProjectDetailPage() {
       ) : (
         <ul style={{ listStyle: "none", padding: 0 }}>
           {tasks?.map((task) => (
-            <TaskCard key={task.id} task={task} projectId={projectId!} />
+            <TaskCard key={task.id} task={task} projectId={projectId} />
           ))}
           {tasks?.length === 0 && <p>No tasks yet.</p>}
         </ul>

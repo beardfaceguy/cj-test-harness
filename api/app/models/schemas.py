@@ -19,8 +19,6 @@ class Priority(str, Enum):
     CRITICAL = "CRITICAL"
 
 
-# ── User ──────────────────────────────────────────────────────────────────────
-
 class UserCreate(BaseModel):
     email: EmailStr
     name: str
@@ -36,14 +34,10 @@ class UserResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
-# ── Auth ──────────────────────────────────────────────────────────────────────
-
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
 
-
-# ── Project ───────────────────────────────────────────────────────────────────
 
 class ProjectCreate(BaseModel):
     name: str
@@ -65,8 +59,6 @@ class ProjectResponse(BaseModel):
 
     model_config = {"from_attributes": True}
 
-
-# ── Task ──────────────────────────────────────────────────────────────────────
 
 class TaskCreate(BaseModel):
     title: str
