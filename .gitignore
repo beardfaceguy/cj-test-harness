@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.env
+api/.env
+
+# Node
+node_modules/
+dist/
+.cache/
+
+# Prisma
+api/prisma/
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
