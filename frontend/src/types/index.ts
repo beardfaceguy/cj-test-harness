@@ -32,6 +32,5 @@ export interface Task {
 
 export interface AuthToken {
   access_token: string;
-  // BUG-N6: token_type defined but never read anywhere in the app — dead type field
   token_type: string;
 }

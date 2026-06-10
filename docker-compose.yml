@@ -3,7 +3,6 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      # BUG-N8: database credentials hardcoded in committed config — should use env vars
       POSTGRES_USER: cjtest
       POSTGRES_PASSWORD: cjtest
       POSTGRES_DB: tasktracker

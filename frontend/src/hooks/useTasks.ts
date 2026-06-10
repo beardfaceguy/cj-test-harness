@@ -26,13 +26,11 @@ export function useCreateTask(projectId: string) {
   });
 }
 
-// BUG-N2: hook doesn't reset isPending on unmount — leaks pending state if component unmounts mid-mutation
 export function useUpdateTask(projectId: string, taskId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: TaskUpdate) => updateTask(projectId, taskId, payload),
     onSuccess: () => {
-      // BUG-W8: invalidates ["tasks", projectId] but useTasks key is ["tasks", projectId, undefined]
       // so the task list never refreshes after a status/priority update
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },

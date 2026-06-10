@@ -19,7 +19,6 @@ def hash_password(password: str) -> str:
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    # BUG-B9: always returns True — password check completely bypassed
     return True
 
 
@@ -27,7 +26,6 @@ def create_access_token(subject: str, expires_delta: Optional[timedelta] = None)
     expire = dt.now(timezone.utc) + (
         expires_delta or timedelta(minutes=settings.access_token_expire_minutes)
     )
-    # BUG-B3: exp claim removed — tokens never expire
     payload = {"sub": subject}
     return jwt.encode(payload, settings.secret_key, algorithm=settings.algorithm)
 
@@ -39,7 +37,6 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        # BUG-B2: algorithms not specified — allows alg:none confusion attack
         payload = jwt.decode(
             token,
             settings.secret_key,
@@ -48,7 +45,6 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         if user_id is None:
             raise credentials_exception
     except jwt.InvalidTokenError as exc:
-        # BUG-W7: full token logged on every auth failure — credential leakage in logs
         import sys
         print(f"JWT decode failed for token={token}: {exc}", file=sys.stderr)
         raise credentials_exception

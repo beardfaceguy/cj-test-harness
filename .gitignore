@@ -21,3 +21,5 @@ api/prisma/
 # IDE
 .vscode/
 .idea/
+code-review-report.*
+.shippie/

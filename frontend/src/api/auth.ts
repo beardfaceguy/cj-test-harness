@@ -21,7 +21,6 @@ export async function login(email: string, password: string): Promise<AuthToken>
   return data;
 }
 
-// BUG-N5: logout is sync but named without 'sync' — callers await it unnecessarily
 export function logout(): void {
   localStorage.removeItem("access_token");
 }

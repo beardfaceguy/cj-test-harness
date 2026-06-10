@@ -29,7 +29,6 @@ async def register(payload: UserCreate):
 
 @router.post("/token", response_model=Token)
 async def login(form: OAuth2PasswordRequestForm = Depends()):
-    # BUG-B8: only checks user exists, never verifies password — any password authenticates
     user = await db.user.find_unique(where={"email": form.username})
     if user is None:
         raise HTTPException(

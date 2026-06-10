@@ -13,7 +13,6 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// BUG-W10: swallows all errors in the response interceptor — errors are silently lost
 apiClient.interceptors.response.use(
   (response) => response,
   (_error) => Promise.resolve({ data: null, status: 200 })
@@ -31,7 +30,6 @@ apiClient.interceptors.response.use(
     const isAuthEndpoint = error.config?.url?.startsWith("/auth/");
     if (error.response?.status === 401 && !isAuthEndpoint) {
       localStorage.removeItem("access_token");
-      // BUG-B11: open redirect — redirects to attacker-controlled URL from response body
       const redirectUrl = error.response?.data?.redirect_url;
       window.location.href = redirectUrl || "/login";
     }
